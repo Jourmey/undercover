@@ -19,14 +19,14 @@ type Ping struct {
 
 // 用户
 type User struct {
-	Id     int         `gorm:"AUTO_INCREMENT"` // Id
-	Openid string      `gorm:"size:255"`       // 标识
-	No     string      `gorm:"size:255"`       // 序号
-	Name   string      `gorm:"size:255"`       // 用户名
-	Word   string      `gorm:"-"`              // 词语名称
-	Role   string      `gorm:"-"`              // 角色
-	Status int         `gorm:"size:1"`         // 状态
-	RoomId string      `gorm:"size:255"`       // 房间号
+	Id     int    `gorm:"AUTO_INCREMENT"` // Id
+	Openid string `gorm:"size:255"`       // 标识
+	No     string `gorm:"size:255"`       // 序号
+	Name   string `gorm:"size:255"`       // 用户名
+	//Word   string      `gorm:"-"`              // 词语名称
+	//Role   string      `gorm:"-"`              // 角色
+	Status int         `gorm:"size:1"`   // 状态
+	RoomId string      `gorm:"size:255"` // 房间号
 	Agent  *gate.Agent `gorm:"-"`
 }
 
@@ -59,22 +59,22 @@ type Logout struct {
 }
 
 type Room struct {
-	Id               int                 `gorm:"AUTO_INCREMENT"`
-	CreateUser       *User               `gorm:"-"`
-	CreateUserId     string              `gorm:"size:255"` // 用户ID
-	Msg              string              `gorm:"-"`
-	RoomId           string              `gorm:"size:255"` // 房间ID
-	Password         string              `gorm:"size:255"` // 房间密码
-	TotalNumber      string              `gorm:"size:255"` // 总人数
-	Number           int                 `gorm:"size:11"`  // 当前人数
-	UndercoverNumber string              `gorm:"size:11"`  // 卧底人数
-	UserList         map[string]*User    `gorm:"-"`
-	GameInfo         *Game               `gorm:"-"`
-	MsgChan          chan string         `json:"-" gorm:"-"`
-	PrepareList      map[string]string   `gorm:"-"`
-	UsedWord         map[string]*Keyword `gorm:"-"` // 使用过词语
-	PrepareNum       int                 `gorm:"-"`
-	IsPrepare        bool                `gorm:"-"`
+	Id int `gorm:"AUTO_INCREMENT"`
+	//CreateUser       *User               `gorm:"-"`
+	CreateUserId string `gorm:"size:255"` // 用户ID
+	//Msg              string              `gorm:"-"`
+	RoomId           string `gorm:"size:255"` // 房间ID
+	Password         string `gorm:"size:255"` // 房间密码
+	TotalNumber      string `gorm:"size:255"` // 总人数
+	Number           int    `gorm:"size:11"`  // 当前人数
+	UndercoverNumber string `gorm:"size:11"`  // 卧底人数
+	//UserList         map[string]*User    `gorm:"-"`
+	//GameInfo         *Game               `gorm:"-"`
+	//MsgChan          chan string         `json:"-" gorm:"-"`
+	//PrepareList      map[string]string   `gorm:"-"`
+	//UsedWord         map[string]*Keyword `gorm:"-"` // 使用过词语
+	//PrepareNum       int                 `gorm:"-"`
+	//IsPrepare        bool                `gorm:"-"`
 }
 
 type RoomOut struct {

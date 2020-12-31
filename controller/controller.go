@@ -7,10 +7,6 @@ import (
 	"github.com/name5566/leaf/log"
 )
 
-const (
-	StrLoginSuccess = "登录成功"
-)
-
 func LoginHandle(args []interface{}) {
 	log.Debug("enter LoginHandle")
 	defer log.Debug("level LoginHandle")
@@ -21,7 +17,7 @@ func LoginHandle(args []interface{}) {
 	mm := manager.Login(m)
 
 	a.WriteMsg(&module.GameMessage{
-		Msg:    StrLoginSuccess,
+		Msg:    "登录成功！",
 		Data:   mm,
 		Type:   "Login",
 		Status: 1,
@@ -37,24 +33,34 @@ func UserHandle(args []interface{}) {
 }
 
 func GameMessageHandle(args []interface{}) {
-	log.Release("enter GameMessageHandle %+v", args)
+	log.Debug("enter GameMessageHandle")
+	defer log.Debug("level GameMessageHandle")
 }
 
 func RoomHandle(args []interface{}) {
 	log.Debug("enter RoomHandle")
 	defer log.Debug("level RoomHandle")
 
-	//m := args[0].(*module.Room)
-	//a := args[1].(gate.Agent)
-	//
-	//a.WriteMsg(&module.GameMessage{
-	//	Msg:    "进入房间: ",
-	//	Data:   data,
-	//	Type:   t,
-	//	Status: 1,
-	//})
-	//
-	//Success(a, "进入房间: ", "Room", "success")
+	m := args[0].(*module.Room)
+	a := args[1].(gate.Agent)
+
+	room, err := manager.CreatRoom(m)
+	if err != nil {
+		a.WriteMsg(&module.GameMessage{
+			Msg:    "创建房间失败！",
+			Data:   nil,
+			Type:   "Room",
+			Status: 0,
+		})
+	}
+	var result = make(map[string]interface{})
+	result["RoomInfo"] = room
+	a.WriteMsg(&module.GameMessage{
+		Msg:    "进入房间: " + m.RoomId,
+		Data:   result,
+		Type:   "Room",
+		Status: 1,
+	})
 }
 
 func GameHandle(args []interface{}) {
