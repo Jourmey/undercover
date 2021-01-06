@@ -1,7 +1,5 @@
 package module
 
-import "github.com/name5566/leaf/gate"
-
 const (
 	Role_Normal     = "Normal"     // 正常
 	Role_Undercover = "Undercover" // 卧底
@@ -10,7 +8,6 @@ const (
 	GameStage_Vote  = "Vote"  // 投票阶段
 	GameStage_Game  = "Game"  // 游戏阶段
 	GameStage_Over  = "Over"  // 完成阶段
-
 )
 
 type Ping struct {
@@ -19,15 +16,14 @@ type Ping struct {
 
 // 用户
 type User struct {
-	Id     int    `gorm:"AUTO_INCREMENT"` // Id
-	Openid string `gorm:"size:255"`       // 标识
-	No     string `gorm:"size:255"`       // 序号
-	Name   string `gorm:"size:255"`       // 用户名
-	//Word   string      `gorm:"-"`              // 词语名称
-	//Role   string      `gorm:"-"`              // 角色
-	Status int         `gorm:"size:1"`   // 状态
-	RoomId string      `gorm:"size:255"` // 房间号
-	Agent  *gate.Agent `gorm:"-"`
+	Id     int    //ID
+	Openid string // 标识
+	No     string // 序号
+	Name   string // 用户名
+	//Word   string                    // 词语名称
+	//Role   string                    // 角色
+	Status int    // 状态
+	RoomId string // 房间号
 }
 
 // 词语
@@ -48,6 +44,30 @@ type GameMessage struct {
 	Type     string
 }
 
+func NewErrorGameMessage(e error) *GameMessage {
+	m := &GameMessage{
+		Msg:    e.Error(),
+		Status: 0,
+	}
+	return m
+}
+func NewSuccessGameMessage(msg string) *GameMessage {
+	m := &GameMessage{
+		Msg:    msg,
+		Status: 1,
+	}
+	return m
+}
+
+func (g *GameMessage) WithType(t string) *GameMessage {
+	g.Type = t
+	return g
+}
+func (g *GameMessage) WithData(t interface{}) *GameMessage {
+	g.Data = t
+	return g
+}
+
 type Login struct {
 	UserName string // 用户名称
 	UserId   string // 用户名称
@@ -59,22 +79,22 @@ type Logout struct {
 }
 
 type Room struct {
-	Id int `gorm:"AUTO_INCREMENT"`
-	//CreateUser       *User               `gorm:"-"`
-	CreateUserId string `gorm:"size:255"` // 用户ID
-	//Msg              string              `gorm:"-"`
-	RoomId           string `gorm:"size:255"` // 房间ID
-	Password         string `gorm:"size:255"` // 房间密码
-	TotalNumber      string `gorm:"size:255"` // 总人数
-	Number           int    `gorm:"size:11"`  // 当前人数
-	UndercoverNumber string `gorm:"size:11"`  // 卧底人数
-	//UserList         map[string]*User    `gorm:"-"`
-	//GameInfo         *Game               `gorm:"-"`
+	Id int
+	//CreateUser       *User               
+	CreateUserId string // 用户ID
+	//Msg              string              
+	RoomId           string // 房间ID
+	Password         string // 房间密码
+	TotalNumber      string // 总人数
+	Number           int    // 当前人数
+	UndercoverNumber string // 卧底人数
+	//UserList         map[string]*User    
+	//GameInfo         *Game               
 	//MsgChan          chan string         `json:"-" gorm:"-"`
-	//PrepareList      map[string]string   `gorm:"-"`
-	//UsedWord         map[string]*Keyword `gorm:"-"` // 使用过词语
-	//PrepareNum       int                 `gorm:"-"`
-	//IsPrepare        bool                `gorm:"-"`
+	PrepareList map[string]string //已经准备的玩家
+	//UsedWord         map[string]*Keyword  // 使用过词语
+	PrepareNum       int
+	IsPrepare bool //是否准备
 }
 
 type RoomOut struct {
@@ -85,7 +105,7 @@ type RoomOut struct {
 // 游戏
 type Game struct {
 	Round            int              // 回合数
-	SurvivalUserList map[string]*User `gorm:"-"` // 存活用户列表
+	SurvivalUserList map[string]*User // 存活用户列表
 	Keyword          *Keyword         // 词语
 	UndercoverNum    int              // 卧底数量
 	Stage            string           // 阶段
@@ -93,10 +113,10 @@ type Game struct {
 	VoteTime         int              // 投票等待时间 (秒)
 	VoteList         map[string]*Vote // 投票列表
 	RoomId           string           // 房间号
-	VoteChan         chan *Vote       `json:"-" gorm:"-"` // 投票通道
-	VoteNum          int              `gorm:"-"`          // 投票次数
+	VoteChan         chan *Vote       // 投票通道
+	VoteNum          int              // 投票次数
 	WinRole          string           // 胜利方
-	OutUser          []*User          `gorm:"-"`
+	OutUser          []*User
 }
 
 type Vote struct {
