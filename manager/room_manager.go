@@ -2,22 +2,21 @@ package manager
 
 import (
 	"anonymousroom/common"
-	"anonymousroom/module"
 	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"time"
 )
 
-var rooms = make(map[string]*module.Room, 100)
+var rooms = make(map[string]*common.Room, 100)
 var roomToUser = make(map[string][]string, 100)
 
-func CreatRoom(m *module.Room, l *module.Login) (*module.Room, error) {
+func CreatRoom(m *common.Room, l *common.Login) (*common.Room, error) {
 	if l == nil {
 		return nil, common.LoginEmptyError
 	}
 	if m == nil {
-		m = new(module.Room)
+		m = new(common.Room)
 	}
 
 	if m.TotalNumber == "" || m.UndercoverNumber == "" {
@@ -37,7 +36,7 @@ func CreatRoom(m *module.Room, l *module.Login) (*module.Room, error) {
 	return m, nil
 }
 
-func InRoom(id string, l *module.Login) (*module.Room, error) {
+func InRoom(id string, l *common.Login) (*common.Room, error) {
 	room, ok := rooms[id]
 	if ok {
 		roomToUser[id] = append(roomToUser[id], l.UserId)
@@ -48,7 +47,7 @@ func InRoom(id string, l *module.Login) (*module.Room, error) {
 	}
 }
 
-func GetRoom(id string) (*module.Room, error) {
+func GetRoom(id string) (*common.Room, error) {
 	if id == "" {
 		return nil, common.InvalidRoomIDError
 	}

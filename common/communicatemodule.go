@@ -1,4 +1,4 @@
-package module
+package common
 
 const (
 	Role_Normal     = "Normal"     // 正常
@@ -93,7 +93,7 @@ type Room struct {
 	//MsgChan          chan string         `json:"-" gorm:"-"`
 	PrepareList map[string]string //已经准备的玩家
 	//UsedWord         map[string]*Keyword  // 使用过词语
-	PrepareNum       int
+	//PrepareNum       int
 	IsPrepare bool //是否准备
 }
 
@@ -138,4 +138,15 @@ type Keyword struct {
 	NormalWord     string
 	UndercoverWord string
 	Vension        int64
+}
+
+/**
+ * 词组返回
+ * @Author: cs_shuai
+ * @Date: 2020-09-21
+ */
+type KeywordResult struct {
+	Keyword      string
+	Stage        string
+	CreateUserId string
 }

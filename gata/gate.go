@@ -1,8 +1,8 @@
 package gata
 
 import (
+	"anonymousroom/common"
 	"anonymousroom/controller"
-	"anonymousroom/module"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/network/json"
@@ -44,24 +44,24 @@ func NewGateModule(tcpAddr, wsAddr string) *GateModule {
 
 func getProcessor() *json.Processor {
 	var processor = json.NewProcessor()
-	processor.Register(&module.Ping{})
-	processor.Register(&module.User{})
-	processor.Register(&module.GameMessage{})
-	processor.Register(&module.Login{})
-	processor.Register(&module.Room{})
-	processor.Register(&module.Game{})
-	processor.Register(&module.Vote{})
-	processor.Register(&module.RoomOut{})
-	processor.Register(&module.Logout{})
+	processor.Register(&common.Ping{})
+	processor.Register(&common.User{})
+	processor.Register(&common.GameMessage{})
+	processor.Register(&common.Login{})
+	processor.Register(&common.Room{})
+	processor.Register(&common.Game{})
+	processor.Register(&common.Vote{})
+	processor.Register(&common.RoomOut{})
+	processor.Register(&common.Logout{})
 
-	processor.SetHandler(&module.Ping{}, controller.PingHandle)
-	processor.SetHandler(&module.User{}, controller.UserHandle)
-	processor.SetHandler(&module.GameMessage{}, controller.GameMessageHandle)
-	processor.SetHandler(&module.Login{}, controller.LoginHandle)
-	processor.SetHandler(&module.Room{}, controller.RoomHandle)
-	processor.SetHandler(&module.Game{}, controller.GameHandle)
-	processor.SetHandler(&module.Vote{}, controller.VoteHandle)
-	processor.SetHandler(&module.RoomOut{}, controller.RoomOutHandle)
-	processor.SetHandler(&module.Logout{}, controller.LogoutHandle)
+	processor.SetHandler(&common.Ping{}, controller.PingHandle)
+	processor.SetHandler(&common.User{}, controller.UserHandle)
+	processor.SetHandler(&common.GameMessage{}, controller.GameMessageHandle)
+	processor.SetHandler(&common.Login{}, controller.LoginHandle)
+	processor.SetHandler(&common.Room{}, controller.RoomHandle)
+	processor.SetHandler(&common.Game{}, controller.GameHandle)
+	processor.SetHandler(&common.Vote{}, controller.VoteHandle)
+	processor.SetHandler(&common.RoomOut{}, controller.RoomOutHandle)
+	processor.SetHandler(&common.Logout{}, controller.LogoutHandle)
 	return processor
 }
