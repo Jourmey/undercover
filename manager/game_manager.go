@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+
 func CreatGame(r *common.Room) (*common.Game, error) {
 	if r == nil {
 		return nil, common.InvalidRoomInfoError
@@ -31,5 +32,17 @@ func CreatGame(r *common.Room) (*common.Game, error) {
 	game.WinRole = ""
 	game.OutUser = make([]*common.User, 0)
 
+	games[game.RoomId] = game
 	return game, nil
+}
+
+func GetGame(roomId string) (*common.Game, error) {
+	if roomId == "" {
+		return nil, common.InvalidRoomIDError
+	}
+	g, ok := games[roomId]
+	if ok {
+		return g, nil
+	}
+	return nil, common.InvalidRoomIDError
 }

@@ -8,9 +8,6 @@ import (
 	"time"
 )
 
-var rooms = make(map[string]*common.Room, 100)
-var roomToUser = make(map[string][]string, 100)
-
 func CreatRoom(m *common.Room, l *common.Login) (*common.Room, error) {
 	if l == nil {
 		return nil, common.LoginEmptyError
@@ -29,7 +26,11 @@ func CreatRoom(m *common.Room, l *common.Login) (*common.Room, error) {
 	}
 	m.CreateUserId = l.UserId
 
-	roomToUser[m.RoomId] = []string{l.UserId}
+	InsertRoomTable([]RoomTable{{
+		UserId: l.UserId,
+		RoomId: m.RoomId,
+	}})
+
 	rooms[m.RoomId] = m
 	m.Number = 1
 	m.PrepareList = make(map[string]string, 5)
@@ -39,7 +40,10 @@ func CreatRoom(m *common.Room, l *common.Login) (*common.Room, error) {
 func InRoom(id string, l *common.Login) (*common.Room, error) {
 	room, ok := rooms[id]
 	if ok {
-		roomToUser[id] = append(roomToUser[id], l.UserId)
+		InsertRoomTable([]RoomTable{{
+			UserId: l.UserId,
+			RoomId: id,
+		}})
 		room.Number++
 		return room, nil
 	} else {
@@ -63,13 +67,16 @@ func SendMessageByRoom(id string, f func(gate.Agent)) error {
 		return common.InvalidRoomIDError
 	}
 
-	user, ok := roomToUser[id]
-	if !ok {
+	user := SelectRoomTable(func(r0 RoomTable) bool {
+		return r0.RoomId == id
+	})
+
+	if len(user) == 0 {
 		return common.InvalidRoomIDError
 	}
 
 	for _, s := range user {
-		a, ok := agents[s]
+		a, ok := agents[s.UserId]
 		if ok {
 			f(a)
 		} else {

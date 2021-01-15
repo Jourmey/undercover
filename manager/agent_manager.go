@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-var users = make(map[string]*common.Login, 100)
-var agents = make(map[string]gate.Agent, 100)
 
 func Login(a gate.Agent, m *common.Login) *common.Login {
 	if m == nil {

@@ -75,7 +75,7 @@ func RoomHandle(args []interface{}) {
 	} else if !m.IsPrepare {
 		room, err = manager.InRoom(m.RoomId, l)
 	} else { // 准备逻辑
-		PrepareHandle(m.RoomId, a, l)
+		prepareHandle(m.RoomId, a, l)
 		return
 	}
 
@@ -98,9 +98,46 @@ func RoomHandle(args []interface{}) {
 	})
 }
 
-func PrepareHandle(roomid string, a gate.Agent, l *common.Login) {
-	log.Debug("enter PrepareHandle()")
-	defer log.Debug("level PrepareHandle()")
+func GameHandle(args []interface{}) {
+	log.Debug("enter GameHandle()")
+	defer log.Debug("level GameHandle()")
+
+	m := args[0].(*common.Game)
+	a := args[1].(gate.Agent)
+	l := a.UserData().(*common.Login)
+
+	switch m.Stage {
+	case common.GameStage_Start:
+		err := gameStart(m, a, l)
+		if err != nil {
+			log.Error("GameHandle. gameStart(m, a, l) failed. err = ", err)
+		}
+		break
+	case common.GameStage_Vote:
+		err := vote(m, a, l)
+		if err != nil {
+			log.Error("GameHandle. gameStart(m, a, l) failed. err = ", err)
+		}
+		break
+	}
+
+}
+
+func VoteHandle(args []interface{}) {
+	log.Release("enter VoteHandle %+v", args)
+}
+
+func RoomOutHandle(args []interface{}) {
+	log.Release("enter RoomOutHandle %+v", args)
+}
+
+func LogoutHandle(args []interface{}) {
+	log.Release("enter LogoutHandle %+v", args)
+}
+
+func prepareHandle(roomid string, a gate.Agent, l *common.Login) {
+	log.Debug("enter prepareHandle()")
+	defer log.Debug("level prepareHandle()")
 
 	r, err := manager.GetRoom(roomid)
 	if err != nil {
@@ -137,36 +174,16 @@ func PrepareHandle(roomid string, a gate.Agent, l *common.Login) {
 	}
 }
 
-func GameHandle(args []interface{}) {
-	log.Debug("enter GameHandle()")
-	defer log.Debug("level GameHandle()")
+func vote(m *common.Game, a gate.Agent, l *common.Login) error {
+	log.Debug("enter vote()")
+	defer log.Debug("level vote()")
 
-	m := args[0].(*common.Game)
-	a := args[1].(gate.Agent)
-	l := a.UserData().(*common.Login)
-
-	switch m.Stage {
-	case common.GameStage_Start:
-		err := GameStart(m, a, l)
-		if err != nil {
-			log.Error("GameHandle. GameStart(m, a, l) failed. err = ", err)
-		}
-		break
-	case common.GameStage_Vote:
-		err := Vote(m, a, l)
-		if err != nil {
-			log.Error("GameHandle. GameStart(m, a, l) failed. err = ", err)
-		}
-		break
-	}
-
+	return manager.SendMessageByRoom(m.RoomId, func(agent gate.Agent) {
+		agent.WriteMsg(common.NewSuccessGameMessage("开始投票").WithType("Vote").WithData(m))
+	})
 }
 
-func Vote(m *common.Game, a gate.Agent, l *common.Login) error {
-	return nil
-}
-
-func GameStart(m *common.Game, a gate.Agent, l *common.Login) error {
+func gameStart(m *common.Game, a gate.Agent, l *common.Login) error {
 	r, err := manager.GetRoom(m.RoomId)
 	if err != nil {
 		return err
@@ -182,20 +199,9 @@ func GameStart(m *common.Game, a gate.Agent, l *common.Login) error {
 		if !isU {
 			k.Keyword = g.Keyword.UndercoverWord
 			isU = true
+		} else {
+			k.Keyword = g.Keyword.NormalWord
 		}
-		k.Keyword = g.Keyword.NormalWord
 		agent.WriteMsg(common.NewSuccessGameMessage("游戏开始").WithType("StartGame").WithData(k))
 	})
-}
-
-func VoteHandle(args []interface{}) {
-	log.Release("enter VoteHandle %+v", args)
-}
-
-func RoomOutHandle(args []interface{}) {
-	log.Release("enter RoomOutHandle %+v", args)
-}
-
-func LogoutHandle(args []interface{}) {
-	log.Release("enter LogoutHandle %+v", args)
 }
