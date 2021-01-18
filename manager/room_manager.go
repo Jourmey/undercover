@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-func CreatRoom(m *common.Room, l *common.Login) (*common.Room, error) {
-	if l == nil {
+func CreatRoom(m *common.Room, l string) (*common.Room, error) {
+	if l == "" {
 		return nil, common.LoginEmptyError
 	}
 	if m == nil {
@@ -24,10 +24,10 @@ func CreatRoom(m *common.Room, l *common.Login) (*common.Room, error) {
 	if m.RoomId == "" {
 		m.RoomId = fmt.Sprintf("1%d", time.Now().UnixNano())
 	}
-	m.CreateUserId = l.UserId
+	m.CreateUserId = l
 
 	InsertRoomTable([]RoomTable{{
-		UserId: l.UserId,
+		UserId: l,
 		RoomId: m.RoomId,
 	}})
 
@@ -37,11 +37,11 @@ func CreatRoom(m *common.Room, l *common.Login) (*common.Room, error) {
 	return m, nil
 }
 
-func InRoom(id string, l *common.Login) (*common.Room, error) {
+func InRoom(id string, l string) (*common.Room, error) {
 	room, ok := rooms[id]
 	if ok {
 		InsertRoomTable([]RoomTable{{
-			UserId: l.UserId,
+			UserId: l,
 			RoomId: id,
 		}})
 		room.Number++

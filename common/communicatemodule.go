@@ -113,10 +113,10 @@ type Game struct {
 	VoteTime         int              // 投票等待时间 (秒)
 	VoteList         map[string]*Vote // 投票列表
 	RoomId           string           // 房间号
-	VoteChan         chan *Vote       // 投票通道
-	VoteNum          int              // 投票次数
-	WinRole          string           // 胜利方
-	OutUser          []*User
+	//VoteChan         chan *Vote       // 投票通道
+	VoteNum int    // 投票次数
+	WinRole string // 胜利方
+	OutUser []*User
 }
 
 type Vote struct {

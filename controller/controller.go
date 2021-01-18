@@ -17,7 +17,7 @@ func LoginHandle(args []interface{}) {
 	a := args[1].(gate.Agent)
 
 	mm := manager.Login(a, m)
-	a.SetUserData(mm)
+	a.SetUserData(&common.UserData{L: mm.UserId})
 	a.WriteMsg(&common.GameMessage{
 		Msg:    "登录成功！",
 		Data:   mm,
@@ -66,14 +66,14 @@ func RoomHandle(args []interface{}) {
 
 	m := args[0].(*common.Room)
 	a := args[1].(gate.Agent)
-	l := a.UserData().(*common.Login)
+	l := a.UserData().(*common.UserData)
 
 	var room *common.Room
 	var err error
 	if m.RoomId == "" {
-		room, err = manager.CreatRoom(m, l)
+		room, err = manager.CreatRoom(m, l.L)
 	} else if !m.IsPrepare {
-		room, err = manager.InRoom(m.RoomId, l)
+		room, err = manager.InRoom(m.RoomId, l.L)
 	} else { // 准备逻辑
 		prepareHandle(m.RoomId, a, l)
 		return
@@ -96,6 +96,8 @@ func RoomHandle(args []interface{}) {
 		Type:   "Room",
 		Status: 1,
 	})
+
+	l.R = room.RoomId
 }
 
 func GameHandle(args []interface{}) {
@@ -104,7 +106,7 @@ func GameHandle(args []interface{}) {
 
 	m := args[0].(*common.Game)
 	a := args[1].(gate.Agent)
-	l := a.UserData().(*common.Login)
+	l := a.UserData().(*common.UserData)
 
 	switch m.Stage {
 	case common.GameStage_Start:
@@ -124,7 +126,14 @@ func GameHandle(args []interface{}) {
 }
 
 func VoteHandle(args []interface{}) {
-	log.Release("enter VoteHandle %+v", args)
+	log.Debug("enter VoteHandle()")
+	defer log.Debug("level VoteHandle()")
+
+	//m := args[0].(*common.Vote)
+	a := args[1].(gate.Agent)
+	//l := a.UserData().(*common.Login)
+
+	a.WriteMsg(common.NewSuccessGameMessage("投票成功").WithType("VoteSuccess"))
 }
 
 func RoomOutHandle(args []interface{}) {
@@ -135,7 +144,7 @@ func LogoutHandle(args []interface{}) {
 	log.Release("enter LogoutHandle %+v", args)
 }
 
-func prepareHandle(roomid string, a gate.Agent, l *common.Login) {
+func prepareHandle(roomid string, a gate.Agent, l *common.UserData) {
 	log.Debug("enter prepareHandle()")
 	defer log.Debug("level prepareHandle()")
 
@@ -144,18 +153,18 @@ func prepareHandle(roomid string, a gate.Agent, l *common.Login) {
 		a.WriteMsg(common.NewErrorGameMessage(err))
 	}
 
-	_, isPrepared := r.PrepareList[l.UserName]
+	_, isPrepared := r.PrepareList[l.L]
 
 	var str string
 	if isPrepared {
 		str = "取消准备"
-		delete(r.PrepareList, l.UserName)
+		delete(r.PrepareList, l.L)
 	} else {
 		str = "已准备"
-		r.PrepareList[l.UserName] = l.UserName
+		r.PrepareList[l.L] = l.L
 	}
 
-	m := common.NewSuccessGameMessage(l.UserName + ": " + str).WithType("Messagee")
+	m := common.NewSuccessGameMessage(l.L + ": " + str).WithType("Messagee")
 	err = manager.SendMessageByRoom(roomid, func(agent gate.Agent) {
 		agent.WriteMsg(m)
 	})
@@ -174,16 +183,7 @@ func prepareHandle(roomid string, a gate.Agent, l *common.Login) {
 	}
 }
 
-func vote(m *common.Game, a gate.Agent, l *common.Login) error {
-	log.Debug("enter vote()")
-	defer log.Debug("level vote()")
-
-	return manager.SendMessageByRoom(m.RoomId, func(agent gate.Agent) {
-		agent.WriteMsg(common.NewSuccessGameMessage("开始投票").WithType("Vote").WithData(m))
-	})
-}
-
-func gameStart(m *common.Game, a gate.Agent, l *common.Login) error {
+func gameStart(m *common.Game, a gate.Agent, l *common.UserData) error {
 	r, err := manager.GetRoom(m.RoomId)
 	if err != nil {
 		return err
@@ -192,6 +192,8 @@ func gameStart(m *common.Game, a gate.Agent, l *common.Login) error {
 	if err != nil {
 		return err
 	}
+
+	//l.G = g
 
 	isU := false
 	return manager.SendMessageByRoom(m.RoomId, func(agent gate.Agent) {
@@ -203,5 +205,20 @@ func gameStart(m *common.Game, a gate.Agent, l *common.Login) error {
 			k.Keyword = g.Keyword.NormalWord
 		}
 		agent.WriteMsg(common.NewSuccessGameMessage("游戏开始").WithType("StartGame").WithData(k))
+	})
+}
+
+func vote(m *common.Game, a gate.Agent, l *common.UserData) error {
+	log.Debug("enter vote()")
+	defer log.Debug("level vote()")
+
+	r, err := manager.GetGame(l.R)
+	if err != nil {
+		return err
+	}
+
+	r.Stage = common.GameStage_Vote
+	return manager.SendMessageByRoom(l.R, func(agent gate.Agent) {
+		agent.WriteMsg(common.NewSuccessGameMessage("开始投票").WithType("Vote").WithData(r))
 	})
 }
