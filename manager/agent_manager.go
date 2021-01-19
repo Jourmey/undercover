@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-
 func Login(a gate.Agent, m *common.Login) *common.Login {
 	if m == nil {
 		m = new(common.Login)
@@ -37,4 +36,15 @@ func GetAgents(userid string) (gate.Agent, error) {
 	}
 
 	return nil, common.InvalidUserIDError
+}
+
+func GetLogin(id string) (*common.Login, error) {
+	if id == "" {
+		return nil, common.InvalidRoomIDError
+	}
+	x, ok := users[id]
+	if ok {
+		return x, nil
+	}
+	return nil, common.InvalidRoomIDError
 }

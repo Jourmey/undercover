@@ -129,11 +129,22 @@ func VoteHandle(args []interface{}) {
 	log.Debug("enter VoteHandle()")
 	defer log.Debug("level VoteHandle()")
 
-	//m := args[0].(*common.Vote)
+	m := args[0].(*common.Vote)
 	a := args[1].(gate.Agent)
-	//l := a.UserData().(*common.Login)
+	l := a.UserData().(*common.UserData)
 
-	a.WriteMsg(common.NewSuccessGameMessage("投票成功").WithType("VoteSuccess"))
+	g, _ := manager.GetGame(l.R)
+	if g.Stage != common.GameStage_Vote {
+		log.Error("VoteHandle failed. game.stage isn't vote")
+		return
+	}
+
+	err := manager.InsertVote(l.R, *m)
+	if err != nil {
+		a.WriteMsg(common.NewErrorGameMessage(err).WithType("VoteSuccess"))
+	} else {
+		a.WriteMsg(common.NewSuccessGameMessage("投票成功").WithType("VoteSuccess"))
+	}
 }
 
 func RoomOutHandle(args []interface{}) {
@@ -218,7 +229,39 @@ func vote(m *common.Game, a gate.Agent, l *common.UserData) error {
 	}
 
 	r.Stage = common.GameStage_Vote
+	// 构造投票对象
+	s := make(map[string]*common.User)
+	rs := manager.SelectRoomTable(func(r0 manager.RoomTable) bool {
+		return r0.RoomId == r.RoomId
+	})
+	for _, rt := range rs {
+		l, err := manager.GetLogin(rt.UserId)
+		if err != nil {
+			continue
+		}
+		s[rt.UserId] = &common.User{
+			Openid: l.UserId,
+			No:     l.UserName,
+			Name:   l.UserName,
+			Status: 0,
+			RoomId: r.RoomId,
+		}
+	}
+	r.SurvivalUserList = s
+
+	manager.CreatVote(l.R, len(s), func(userId string) {
+		//投出了userid
+		voteOver(r, userId)
+	})
+
 	return manager.SendMessageByRoom(l.R, func(agent gate.Agent) {
 		agent.WriteMsg(common.NewSuccessGameMessage("开始投票").WithType("Vote").WithData(r))
 	})
+}
+
+func voteOver(g *common.Game, id string) {
+	if g.Stage != common.GameStage_Vote {
+		return
+	}
+
 }

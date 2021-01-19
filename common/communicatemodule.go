@@ -16,7 +16,7 @@ type Ping struct {
 
 // 用户
 type User struct {
-	Id     int    //ID
+	//Id     int    //ID
 	Openid string // 标识
 	No     string // 序号
 	Name   string // 用户名
@@ -128,11 +128,6 @@ type Vote struct {
 	GameId           string
 }
 
-/**
- * 词组
- * @Author: cs_shuai
- * @Date: 2020-09-11
- */
 type Keyword struct {
 	Code           string
 	NormalWord     string
@@ -140,11 +135,6 @@ type Keyword struct {
 	Vension        int64
 }
 
-/**
- * 词组返回
- * @Author: cs_shuai
- * @Date: 2020-09-21
- */
 type KeywordResult struct {
 	Keyword      string
 	Stage        string

@@ -5,7 +5,6 @@ import (
 	"strconv"
 )
 
-
 func CreatGame(r *common.Room) (*common.Game, error) {
 	if r == nil {
 		return nil, common.InvalidRoomInfoError
@@ -27,7 +26,7 @@ func CreatGame(r *common.Room) (*common.Game, error) {
 	game.VoteTime = 60
 	game.VoteList = make(map[string]*common.Vote)
 	game.RoomId = r.RoomId
-	game.VoteChan = make(chan *common.Vote)
+	//game.VoteChan = make(chan *common.Vote)
 	game.VoteNum = 1
 	game.WinRole = ""
 	game.OutUser = make([]*common.User, 0)
