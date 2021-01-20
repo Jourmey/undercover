@@ -264,4 +264,12 @@ func voteOver(g *common.Game, id string) {
 		return
 	}
 
+	l, err := manager.GetLogin(id)
+	if err == nil {
+		msg := fmt.Sprintf("%s 淘汰", l.UserName)
+		_=manager.SendMessageByRoom(g.RoomId, func(agent gate.Agent) {
+			agent.WriteMsg(common.NewSuccessGameMessage(msg).WithType("Over").WithData(g))
+		})
+	}
+
 }
