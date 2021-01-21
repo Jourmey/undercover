@@ -32,7 +32,19 @@ func InsertVote(roomId string, v common.Vote) error {
 
 	vv.votes = append(vv.votes, v)
 	if len(vv.votes) == vv.userNumber {
-		vv.action(v.UserId)
+		var voteResult = make(map[string]int)
+		for _, vote := range vv.votes {
+			voteResult[vote.VotePlayerNumber]++
+		}
+
+		ii := ""
+		voteV := 0
+		for id, i := range voteResult {
+			if i > voteV {
+				ii = id
+			}
+		}
+		vv.action(ii)
 	}
 	return nil
 }
