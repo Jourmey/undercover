@@ -24,12 +24,12 @@ func CreatGame(r *common.Room) (*common.Game, error) {
 	game.Stage = "start"
 	game.ActionTime = 60
 	game.VoteTime = 60
-	game.VoteList = make(map[string]*common.Vote)
+	//game.VoteList = make(map[string]*common.Vote)
 	game.RoomId = r.RoomId
 	//game.VoteChan = make(chan *common.Vote)
-	game.VoteNum = 1
+	//game.VoteNum = 1
 	game.WinRole = ""
-	game.OutUser = make([]*common.User, 0)
+	//game.OutUser = make([]*common.User, 0)
 
 	games[game.RoomId] = game
 	return game, nil

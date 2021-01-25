@@ -33,7 +33,7 @@ func CreatRoom(m *common.Room, l string) (*common.Room, error) {
 
 	rooms[m.RoomId] = m
 	m.Number = 1
-	m.PrepareList = make(map[string]string, 5)
+	//m.PrepareList = make(map[string]string, 5)
 	return m, nil
 }
 

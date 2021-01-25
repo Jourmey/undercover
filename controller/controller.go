@@ -164,16 +164,18 @@ func prepareHandle(roomid string, a gate.Agent, l *common.UserData) {
 		a.WriteMsg(common.NewErrorGameMessage(err))
 	}
 
-	_, isPrepared := r.PrepareList[l.L]
-
 	var str string
-	if isPrepared {
-		str = "取消准备"
-		delete(r.PrepareList, l.L)
-	} else {
-		str = "已准备"
-		r.PrepareList[l.L] = l.L
-	}
+	manager.UpdateRoomTable(func(r0 manager.RoomTable) bool {
+		return r0.UserId == l.L
+	}, func(r manager.RoomTable) manager.RoomTable {
+		if r.IsPrepare {
+			str = "取消准备"
+		} else {
+			str = "已准备"
+		}
+		r.IsPrepare = !r.IsPrepare
+		return r
+	})
 
 	m := common.NewSuccessGameMessage(l.L + ": " + str).WithType("Messagee")
 	err = manager.SendMessageByRoom(roomid, func(agent gate.Agent) {
@@ -186,8 +188,12 @@ func prepareHandle(roomid string, a gate.Agent, l *common.UserData) {
 	if err != nil {
 		return
 	}
+
 	totalNumber, _ := strconv.Atoi(r.TotalNumber)
-	if len(r.PrepareList) == totalNumber-1 && totalNumber == r.Number {
+	pp := manager.SelectRoomTable(func(r0 manager.RoomTable) bool {
+		return r0.RoomId == roomid && r0.IsPrepare
+	})
+	if len(pp) == totalNumber-1 && totalNumber == r.Number {
 		ca.WriteMsg(common.NewSuccessGameMessage("开始").WithType("Start"))
 	} else {
 		ca.WriteMsg(common.NewSuccessGameMessage("准备").WithType("Start"))
@@ -207,16 +213,25 @@ func gameStart(m *common.Game, a gate.Agent, l *common.UserData) error {
 	//l.G = g
 
 	isU := false
-	return manager.SendMessageByRoom(m.RoomId, func(agent gate.Agent) {
+	manager.UpdateRoomTable(func(r0 manager.RoomTable) bool {
+		return r0.RoomId == m.RoomId
+	}, func(r manager.RoomTable) manager.RoomTable {
 		k := new(common.KeywordResult)
 		if !isU {
 			k.Keyword = g.Keyword.UndercoverWord
 			isU = true
+			r.IsUndercover = true
 		} else {
 			k.Keyword = g.Keyword.NormalWord
+			r.IsUndercover = false
 		}
+		agent, _ := manager.GetAgents(r.UserId)
 		agent.WriteMsg(common.NewSuccessGameMessage("游戏开始").WithType("StartGame").WithData(k))
+
+		return r
 	})
+
+	return nil
 }
 
 func vote(m *common.Game, a gate.Agent, l *common.UserData) error {
@@ -232,7 +247,7 @@ func vote(m *common.Game, a gate.Agent, l *common.UserData) error {
 	// 构造投票对象
 	s := make(map[string]*common.User)
 	rs := manager.SelectRoomTable(func(r0 manager.RoomTable) bool {
-		return r0.RoomId == r.RoomId
+		return r0.RoomId == r.RoomId && r0.IsOut == false
 	})
 	for _, rt := range rs {
 		l, err := manager.GetLogin(rt.UserId)
@@ -249,9 +264,9 @@ func vote(m *common.Game, a gate.Agent, l *common.UserData) error {
 	}
 	r.SurvivalUserList = s
 
-	manager.CreatVote(l.R, len(s), func(userId string) {
+	manager.CreatVote(l.R, len(s), func(v []common.Vote) {
 		//投出了userid
-		voteOver(r, userId)
+		voteOver(r, v)
 	})
 
 	return manager.SendMessageByRoom(l.R, func(agent gate.Agent) {
@@ -259,16 +274,83 @@ func vote(m *common.Game, a gate.Agent, l *common.UserData) error {
 	})
 }
 
-func voteOver(g *common.Game, id string) {
+func voteOver(g *common.Game, v []common.Vote) {
 	if g.Stage != common.GameStage_Vote {
 		return
 	}
 
-	l, err := manager.GetLogin(id)
-	if err == nil {
-		msg := fmt.Sprintf("%s 淘汰", l.UserName)
-		_=manager.SendMessageByRoom(g.RoomId, func(agent gate.Agent) {
-			agent.WriteMsg(common.NewSuccessGameMessage(msg).WithType("Over").WithData(g))
+	result := fmt.Sprintf("第%d回合投票结果: <br>", g.Round)
+	for _, vv := range v {
+		l1, _ := manager.GetLogin(vv.UserId)
+		l2, _ := manager.GetLogin(vv.VotePlayerNumber)
+		result += fmt.Sprintf("%s : 投票-> %s <br>", l1.UserName, l2.UserName)
+	}
+
+	_ = manager.SendMessageByRoom(g.RoomId, func(agent gate.Agent) {
+		agent.WriteMsg(common.NewSuccessGameMessage(result).WithType("Messagee"))
+	})
+
+	var voteResult = make(map[string]int)
+	for _, vote := range v {
+		voteResult[vote.VotePlayerNumber]++
+	}
+
+	ii := ""
+	voteV := 0
+	maxtimes := 0
+	for id, i := range voteResult {
+		if i > voteV {
+			ii = id
+			maxtimes = 1
+		} else if i == voteV {
+			maxtimes++
+		}
+	}
+
+	manager.UpdateRoomTable(func(r0 manager.RoomTable) bool {
+		return r0.UserId == ii
+	}, func(r manager.RoomTable) manager.RoomTable {
+		r.IsOut = true
+		return r
+	})
+
+	a := manager.SelectRoomTable(func(r0 manager.RoomTable) bool {
+		return r0.RoomId == g.RoomId && r0.IsOut == false && r0.IsUndercover
+	})
+
+	var msg string
+	var isNeedInit bool
+	if len(a) == 0 { // 不存在卧底 // 好人胜利
+		g.Stage = common.GameStage_Over
+		g.WinRole = common.Role_Normal
+		msg = "好人胜利"
+		isNeedInit = true
+	} else if len(a) <= g.UndercoverNum+1 { // 卧底胜利
+		g.Stage = common.GameStage_Over
+		g.WinRole = common.Role_Undercover
+		msg = "卧底胜利"
+		isNeedInit = true
+	} else { // 游戏阶段为继续游戏
+		g.Round++
+		g.Stage = common.GameStage_Game
+		msg = "游戏继续"
+		isNeedInit = false
+	}
+
+	out, _ := manager.GetLogin(ii)
+	var message = fmt.Sprintf("%s 淘汰, %s", out.UserName, msg)
+	_ = manager.SendMessageByRoom(g.RoomId, func(agent gate.Agent) {
+		agent.WriteMsg(common.NewSuccessGameMessage(message).WithType(g.Stage).WithData(g))
+	})
+
+	if isNeedInit {
+		manager.UpdateRoomTable(func(r0 manager.RoomTable) bool {
+			return r0.RoomId == g.RoomId
+		}, func(r manager.RoomTable) manager.RoomTable {
+			r.IsPrepare = false
+			r.IsOut = false
+			r.IsUndercover = false
+			return r
 		})
 	}
 

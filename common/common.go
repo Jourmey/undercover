@@ -1,7 +1,7 @@
 package common
 
 type UserData struct {
-	L string
-	R string
+	L string //userid
+	R string //roomid
 	//G string
 }

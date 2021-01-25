@@ -5,8 +5,11 @@ import (
 )
 
 type RoomTable struct {
-	UserId string
-	RoomId string
+	UserId       string
+	RoomId       string
+	IsUndercover bool //是否为卧底
+	IsPrepare    bool //是否准备
+	IsOut        bool //是否出局
 }
 
 var (

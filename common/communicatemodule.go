@@ -16,12 +16,9 @@ type Ping struct {
 
 // 用户
 type User struct {
-	//Id     int    //ID
 	Openid string // 标识
 	No     string // 序号
 	Name   string // 用户名
-	//Word   string                    // 词语名称
-	//Role   string                    // 角色
 	Status int    // 状态
 	RoomId string // 房间号
 }
@@ -79,22 +76,14 @@ type Logout struct {
 }
 
 type Room struct {
-	Id int
-	//CreateUser       *User               
-	CreateUserId string // 用户ID
-	//Msg              string              
+	Id               int
+	CreateUserId     string // 用户ID
 	RoomId           string // 房间ID
 	Password         string // 房间密码
 	TotalNumber      string // 总人数
 	Number           int    // 当前人数
 	UndercoverNumber string // 卧底人数
-	//UserList         map[string]*User    
-	//GameInfo         *Game               
-	//MsgChan          chan string         `json:"-" gorm:"-"`
-	PrepareList map[string]string //已经准备的玩家
-	//UsedWord         map[string]*Keyword  // 使用过词语
-	//PrepareNum       int
-	IsPrepare bool //是否准备
+	IsPrepare        bool   //是否准备
 }
 
 type RoomOut struct {
@@ -111,12 +100,8 @@ type Game struct {
 	Stage            string           // 阶段
 	ActionTime       int              // 操作时间
 	VoteTime         int              // 投票等待时间 (秒)
-	VoteList         map[string]*Vote // 投票列表
 	RoomId           string           // 房间号
-	//VoteChan         chan *Vote       // 投票通道
-	VoteNum int    // 投票次数
-	WinRole string // 胜利方
-	OutUser []*User
+	WinRole          string           // 胜利方
 }
 
 type Vote struct {

@@ -7,13 +7,13 @@ import (
 
 var votes = make(map[string]*votesInfo, 100) //roomId
 type votesInfo struct {
-	action     func(userId string)
+	action     func(v []common.Vote)
 	userNumber int
 	votes      []common.Vote
 	m          sync.Mutex
 }
 
-func CreatVote(roomId string, user int, action func(userId string)) {
+func CreatVote(roomId string, user int, action func(v []common.Vote)) {
 	votes[roomId] = &votesInfo{
 		action:     action,
 		userNumber: user,
@@ -32,19 +32,10 @@ func InsertVote(roomId string, v common.Vote) error {
 
 	vv.votes = append(vv.votes, v)
 	if len(vv.votes) == vv.userNumber {
-		var voteResult = make(map[string]int)
-		for _, vote := range vv.votes {
-			voteResult[vote.VotePlayerNumber]++
-		}
 
-		ii := ""
-		voteV := 0
-		for id, i := range voteResult {
-			if i > voteV {
-				ii = id
-			}
-		}
-		vv.action(ii)
+		vv.action(vv.votes)
+
+		defer delete(votes, roomId)
 	}
 	return nil
 }
