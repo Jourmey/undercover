@@ -52,7 +52,7 @@ func getProcessor() *json.Processor {
 	processor.Register(&common.Game{})
 	processor.Register(&common.Vote{})
 	processor.Register(&common.RoomOut{})
-	processor.Register(&common.Logout{})
+	processor.Register(&common.UserOut{})
 
 	processor.SetHandler(&common.Ping{}, controller.PingHandle)
 	processor.SetHandler(&common.User{}, controller.UserHandle)
@@ -62,6 +62,7 @@ func getProcessor() *json.Processor {
 	processor.SetHandler(&common.Game{}, controller.GameHandle)
 	processor.SetHandler(&common.Vote{}, controller.VoteHandle)
 	processor.SetHandler(&common.RoomOut{}, controller.RoomOutHandle)
-	processor.SetHandler(&common.Logout{}, controller.LogoutHandle)
+	processor.SetHandler(&common.UserOut{}, controller.UserOutHandle)
+
 	return processor
 }

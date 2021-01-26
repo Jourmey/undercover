@@ -148,11 +148,29 @@ func VoteHandle(args []interface{}) {
 }
 
 func RoomOutHandle(args []interface{}) {
-	log.Release("enter RoomOutHandle %+v", args)
+	log.Debug("enter RoomOutHandle()")
+	defer log.Debug("level RoomOutHandle()")
+
+	m := args[0].(*common.RoomOut)
+	//a := args[1].(gate.Agent)
+	//l := a.UserData().(*common.UserData)
+
+	manager.DeleteRoomTable(func(r0 manager.RoomTable) bool {
+		return r0.UserId == m.UserId && r0.RoomId == m.RoomId
+	})
 }
 
-func LogoutHandle(args []interface{}) {
-	log.Release("enter LogoutHandle %+v", args)
+func UserOutHandle(args []interface{}) {
+	log.Debug("enter UserOutHandle()")
+	defer log.Debug("level UserOutHandle()")
+
+	m := args[0].(*common.UserOut)
+	//a := args[1].(gate.Agent)
+	//l := a.UserData().(*common.UserData)
+
+	manager.DeleteRoomTable(func(r0 manager.RoomTable) bool {
+		return r0.UserId == m.UserId
+	})
 }
 
 func prepareHandle(roomid string, a gate.Agent, l *common.UserData) {

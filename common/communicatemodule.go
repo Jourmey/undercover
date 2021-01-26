@@ -70,9 +70,13 @@ type Login struct {
 	UserId   string // 用户名称
 }
 
-type Logout struct {
-	UserName string // 用户名称
-	UserId   string // 用户名称
+//type Logout struct {
+//	UserName string // 用户名称
+//	UserId   string // 用户名称
+//}
+
+type UserOut struct {
+	UserId string
 }
 
 type Room struct {
