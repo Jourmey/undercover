@@ -1,24 +1,24 @@
 package manager
 
 import (
-	"anonymousroom/common"
 	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
+	"undercover/msg"
 	"time"
 )
 
-func CreatRoom(m *common.Room, l string) (*common.Room, error) {
+func CreatRoom(m *msg.Room, l string) (*msg.Room, error) {
 	if l == "" {
-		return nil, common.LoginEmptyError
+		return nil, msg.LoginEmptyError
 	}
 	if m == nil {
-		m = new(common.Room)
+		m = new(msg.Room)
 	}
 
 	if m.TotalNumber == "" || m.UndercoverNumber == "" {
 		log.Error("creat room failed。")
-		return nil, common.InvalidRoomInfoError
+		return nil, msg.InvalidRoomInfoError
 	}
 
 	if m.RoomId == "" {
@@ -37,7 +37,7 @@ func CreatRoom(m *common.Room, l string) (*common.Room, error) {
 	return m, nil
 }
 
-func InRoom(id string, l string) (*common.Room, error) {
+func InRoom(id string, l string) (*msg.Room, error) {
 	room, ok := rooms[id]
 	if ok {
 		InsertRoomTable([]RoomTable{{
@@ -47,24 +47,24 @@ func InRoom(id string, l string) (*common.Room, error) {
 		room.Number++
 		return room, nil
 	} else {
-		return nil, common.InvalidRoomIDError
+		return nil, msg.InvalidRoomIDError
 	}
 }
 
-func GetRoom(id string) (*common.Room, error) {
+func GetRoom(id string) (*msg.Room, error) {
 	if id == "" {
-		return nil, common.InvalidRoomIDError
+		return nil, msg.InvalidRoomIDError
 	}
 	room, ok := rooms[id]
 	if ok {
 		return room, nil
 	}
-	return nil, common.InvalidRoomIDError
+	return nil, msg.InvalidRoomIDError
 }
 
 func SendMessageByRoom(id string, f func(gate.Agent)) error {
 	if id == "" {
-		return common.InvalidRoomIDError
+		return msg.InvalidRoomIDError
 	}
 
 	user := SelectRoomTable(func(r0 RoomTable) bool {
@@ -72,7 +72,7 @@ func SendMessageByRoom(id string, f func(gate.Agent)) error {
 	})
 
 	if len(user) == 0 {
-		return common.InvalidRoomIDError
+		return msg.InvalidRoomIDError
 	}
 
 	for _, s := range user {

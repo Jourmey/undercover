@@ -1,8 +1,6 @@
 package manager
 
-import (
-	"anonymousroom/utils"
-)
+import "undercover/utils"
 
 type RoomTable struct {
 	UserId       string

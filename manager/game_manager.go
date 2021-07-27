@@ -1,20 +1,20 @@
 package manager
 
 import (
-	"anonymousroom/common"
+	"undercover/msg"
 	"strconv"
 )
 
-func CreatGame(r *common.Room) (*common.Game, error) {
+func CreatGame(r *msg.Room) (*msg.Game, error) {
 	if r == nil {
-		return nil, common.InvalidRoomInfoError
+		return nil, msg.InvalidRoomInfoError
 	}
 
 	undercoverNum, _ := strconv.Atoi(r.UndercoverNumber)
-	game := new(common.Game)
+	game := new(msg.Game)
 	game.Round = 1
-	game.SurvivalUserList = make(map[string]*common.User)
-	game.Keyword = &common.Keyword{
+	game.SurvivalUserList = make(map[string]*msg.User)
+	game.Keyword = &msg.Keyword{
 		Code:           "",
 		NormalWord:     "枕头",
 		UndercoverWord: "抱枕",
@@ -24,24 +24,24 @@ func CreatGame(r *common.Room) (*common.Game, error) {
 	game.Stage = "start"
 	game.ActionTime = 60
 	game.VoteTime = 60
-	//game.VoteList = make(map[string]*common.Vote)
+	//game.VoteList = make(map[string]*msg.Vote)
 	game.RoomId = r.RoomId
-	//game.VoteChan = make(chan *common.Vote)
+	//game.VoteChan = make(chan *msg.Vote)
 	//game.VoteNum = 1
 	game.WinRole = ""
-	//game.OutUser = make([]*common.User, 0)
+	//game.OutUser = make([]*msg.User, 0)
 
 	games[game.RoomId] = game
 	return game, nil
 }
 
-func GetGame(roomId string) (*common.Game, error) {
+func GetGame(roomId string) (*msg.Game, error) {
 	if roomId == "" {
-		return nil, common.InvalidRoomIDError
+		return nil, msg.InvalidRoomIDError
 	}
 	g, ok := games[roomId]
 	if ok {
 		return g, nil
 	}
-	return nil, common.InvalidRoomIDError
+	return nil, msg.InvalidRoomIDError
 }

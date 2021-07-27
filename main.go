@@ -1,18 +1,24 @@
 package main
 
 import (
-	"anonymousroom/gata"
 	"github.com/name5566/leaf"
-	"github.com/name5566/leaf/conf"
-	"github.com/name5566/leaf/log"
+	lconf "github.com/name5566/leaf/conf"
+	"undercover/conf"
+	"undercover/game"
+	"undercover/gate"
+	"undercover/login"
 )
 
 func main() {
-	log.Debug("enter main")
-	defer log.Debug("level main")
+	lconf.LogLevel = conf.Server.LogLevel
+	lconf.LogPath = conf.Server.LogPath
+	lconf.LogFlag = conf.LogFlag
+	lconf.ConsolePort = conf.Server.ConsolePort
+	lconf.ProfilePath = conf.Server.ProfilePath
 
-	conf.LogLevel = "debug"
-
-	g := gata.NewGateModule("", ":8889")
-	leaf.Run(g)
+	leaf.Run(
+		game.Module,
+		gate.Module,
+		login.Module,
+	)
 }

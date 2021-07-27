@@ -1,15 +1,15 @@
 package manager
 
 import (
-	"anonymousroom/common"
 	"fmt"
 	"github.com/name5566/leaf/gate"
+	"undercover/msg"
 	"time"
 )
 
-func Login(a gate.Agent, m *common.Login) *common.Login {
+func Login(a gate.Agent, m *msg.Login) *msg.Login {
 	if m == nil {
-		m = new(common.Login)
+		m = new(msg.Login)
 	}
 	if m.UserId == "" {
 		m.UserId = fmt.Sprintf("0%d", time.Now().UnixNano())
@@ -28,23 +28,23 @@ func Login(a gate.Agent, m *common.Login) *common.Login {
 
 func GetAgents(userid string) (gate.Agent, error) {
 	if userid == "" {
-		return nil, common.InvalidUserIDError
+		return nil, msg.InvalidUserIDError
 	}
 	a, ok := agents[userid]
 	if ok {
 		return a, nil
 	}
 
-	return nil, common.InvalidUserIDError
+	return nil, msg.InvalidUserIDError
 }
 
-func GetLogin(id string) (*common.Login, error) {
+func GetLogin(id string) (*msg.Login, error) {
 	if id == "" {
-		return nil, common.InvalidRoomIDError
+		return nil, msg.InvalidRoomIDError
 	}
 	x, ok := users[id]
 	if ok {
 		return x, nil
 	}
-	return nil, common.InvalidRoomIDError
+	return nil, msg.InvalidRoomIDError
 }
